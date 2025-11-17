@@ -1,0 +1,85 @@
+#include "dynamic_array.cpp"
+#include <iostream>
+
+#define VARIANT 5
+#define ROWS 2
+#define COLS 2
+
+void transform2d(dynamic_array<dynamic_array<long>>& arr)
+{
+	long a = arr[0][0], b = arr[0][1], c = arr[1][0], d = arr[1][1];
+	for (unsigned long long i = 0; i < ROWS; ++i) {
+		for (unsigned long long j = 0; j < b; ++j) {
+			arr[i].push_back((i - 1) * c + (j + 1) * d);
+		}
+	}
+	for (unsigned long long i = ROWS; i < ROWS + a; ++i) {
+		arr.push_back(dynamic_array<long>());
+		for (unsigned long long j = 0; j < COLS + b; ++j) {
+			arr[i].push_back((i - ROWS + 1) * c + (j - 1) * d);
+		}
+	}
+}
+
+void firstClause()
+{
+	dynamic_array<dynamic_array<long>> arr(ROWS, dynamic_array<long>(COLS)); // dynamic_array.cpp
+	long a, b, c, d;
+	
+	std::cout << "¬ведите A: ";
+	for (;std::cin >> a; std::cout << "ќшибка (A < 0)" << std::endl << "¬ведите A: ") {
+		if (a >= 0) break; 
+	}
+	arr[0][0] = a;
+	std::cout << "¬ведите B: ";
+	for (;std::cin >> b; std::cout << "ќшибка (B < 0)" << std::endl << "¬ведите B: ") {
+		if (b >= 0) break; 
+	}
+	arr[0][1] = b;
+	std::cout << "¬ведите C: ";
+	std::cin >> c;
+	arr[1][0] = c;
+	std::cout << "¬ведите D: ";
+	std::cin >> d;
+	arr[1][1] = d;
+
+	transform2d(arr);
+
+	for (unsigned long long i = 0; i < arr.size; ++i) {
+		for (unsigned long long j = 0; j < arr[i].size; ++j)
+			std::cout << arr[i][j] << " ";
+		std::cout << std::endl;
+	}
+}
+
+void secondClause()
+{
+	double a, b, *pa = &a, *pb = &b;
+	std::cout << "¬ведите A и B: ";
+	std::cin >> a >> b;
+	*pa *= 3;
+	pa = new double(a);
+	pb = new double(b);
+	a = *pb;
+	b = *pa;
+	delete pa;
+	delete pb;
+	std::cout << "A = " << a << ", B = " << b;
+	pa = &a;
+	pb = &b;
+}
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	uint16_t flag;
+	std::cout << "ѕункт 1: 1" << std::endl << "ѕункт 2: 2" << std::endl;
+	std::cin >> flag;
+
+	if (flag == 1) 
+		firstClause();
+	else if (flag == 2)
+		secondClause();
+
+	return 0;
+}
