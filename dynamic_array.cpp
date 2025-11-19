@@ -1,46 +1,61 @@
-#include <initializer_list> // мог бы и через va_list
+#include <initializer_list>
 #include <cstdlib> // malloc
-#include <cstring> // memcpy (strcpy)
-#include <iostream>
 
 #define DEFAULT_CAPACITY 4
 
-// из-за нетривиальности используемого в лабе типа испытал огромную боль настоящего ООП. оно того стоило, многое стало проясняться
+// из-за нетривиальности используемого в лабе типа было больно, но оно того стоило: многое стало проясняться
 
 template<typename T>
 class dynamic_array {
 public:
-	dynamic_array<T>() : size(0), capacity(DEFAULT_CAPACITY), inner(reinterpret_cast<T*>(calloc(capacity, sizeof(T)))) {};
-	dynamic_array<T>(const dynamic_array<T>& other) {
-		size = other.size;
-		capacity = other.capacity;
+	unsigned long long capacity;
+	unsigned long long size;
+	T* inner;
+
+	dynamic_array<T>() : size(0), capacity(DEFAULT_CAPACITY) {
+		inner = reinterpret_cast<T*>(calloc(capacity, sizeof(T)));
+	} // default
+	
+	dynamic_array<T>(const dynamic_array<T>& other) : size(other.size), capacity(other.capacity) {
 		inner = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
 		for (unsigned long long i = 0; i < size; ++i) {
+			// и тут я осознал, что не получится на сишных функциях вывезти (или я слаб)
 			new (&inner[i]) T(other.inner[i]);
-			// inner[i] = other.inner[i];
-		} // нетривиальный тип dynamic_array<long> через memcpy не идёт
-	}
-	explicit dynamic_array<T>(unsigned long long size) : size(size), capacity(size + DEFAULT_CAPACITY), inner(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))) {
+			// inner[i] = other.inner[i], но нетривиальный тип => placement new в выделенный inner + констр. копир.
+		}
+	} // copy
+
+	dynamic_array<T>(unsigned long long size) : size(size), capacity(size + DEFAULT_CAPACITY) {
+		inner = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
 		for (unsigned long long i = 0; i < size; ++i) {
 			new (&inner[i]) T();
 		}
-	};
-	explicit dynamic_array<T>(unsigned long long size, const T& value) : size(size), capacity(size + DEFAULT_CAPACITY), inner(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))) {
+	} // by size
+
+	dynamic_array<T>(unsigned long long size, const T& value) : size(size), capacity(size + DEFAULT_CAPACITY) {
+		inner = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
 		for (unsigned long long i = 0; i < size; ++i) {
 			new (&inner[i]) T(value);
-			// memcpy(&inner[i], &value, sizeof(T));
 		}
-	};
-	dynamic_array<T>(std::initializer_list<T> init) : size(init.size()), capacity(size + DEFAULT_CAPACITY), inner(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))) {
+	} // такая себе реализация многомерности
+	// dynamic_array<dynamic_array<long>> arr(ROWS, dynamic_array<long>(COLS))
+
+	dynamic_array<T>(std::initializer_list<T> init) : size(init.size()), capacity(size + DEFAULT_CAPACITY) {
+		inner = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
 		unsigned long long i = 0;
 		for (auto& e : init) {
-			new(inner[i++]) T(e);
-		}		
-	}
+			new(&inner[i++]) T(e);
+		}
+	} // было интересно, как реализуется различие arr{3} и arr(3). всё равно магия какая-то
 
 	~dynamic_array<T>() {
 		freeInner();
 	}
+
+	T& operator[](unsigned long long index) {
+		if (index >= size) throw "Выход за границу массива";
+		return inner[index];
+	} // сегодня без итераторов
 	
 	dynamic_array<T>& operator=(const dynamic_array<T>& other) {
 		freeInner();
@@ -48,23 +63,17 @@ public:
 		capacity = other.capacity;
 		inner = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
 		for (unsigned long long i = 0; i < size; ++i) {
-			inner[i] = other.inner[i];
+			new (&inner[i]) T(other.inner[i]);
 		}
 		return *this;
 	}
-	
-	T& operator[](unsigned long long index) {
-		if (index >= size) throw "Выход за границу массива";
-		return inner[index];
-	};
-	unsigned long long size;
-	unsigned long long capacity;
-	dynamic_array<T>& insert(unsigned long long index, T e) { // сегодня без итераторов
+
+	dynamic_array<T>& insert(unsigned long long index, T e) {
 		++size;
 		if (index >= size) throw "Выход за границу массива";
 		if (capacity < size) {
 			capacity += DEFAULT_CAPACITY;
-			T* new_inner = reinterpret_cast<T*>(malloc(capacity * sizeof(T))); // new T[capacity];
+			T* new_inner = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
 
 			for (unsigned long long i = 0; i < index; ++i) {
 				new (&new_inner[i]) T(inner[i]);
@@ -93,8 +102,8 @@ public:
 		return *this;
 	}
 
-	// erase для лабы не нужен
-	T* inner;
+	// erase писать уже скучно
+
 private:
 	void freeInner()
 	{

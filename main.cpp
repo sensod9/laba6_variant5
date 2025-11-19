@@ -24,24 +24,24 @@ void transform2d(dynamic_array<dynamic_array<long>>& arr)
 void firstClause()
 {
 	dynamic_array<dynamic_array<long>> arr(ROWS, dynamic_array<long>(COLS)); // dynamic_array.cpp
-	long a, b, c, d;
 	
-	std::cout << "Ââåäèòå A: ";
-	for (;std::cin >> a; std::cout << "Îøèáêà (A < 0)" << std::endl << "Ââåäèòå A: ") {
-		if (a >= 0) break; 
+	long temp;
+	std::cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ A: ";
+	for (;std::cin >> temp; std::cout << "ÐžÑˆÐ¸Ð±ÐºÐ° (A < 0)" << std::endl << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ A: ") {
+		if (temp >= 0) break; 
 	}
-	arr[0][0] = a;
-	std::cout << "Ââåäèòå B: ";
-	for (;std::cin >> b; std::cout << "Îøèáêà (B < 0)" << std::endl << "Ââåäèòå B: ") {
-		if (b >= 0) break; 
+	arr[0][0] = temp;
+	std::cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ B: ";
+	for (;std::cin >> temp; std::cout << "ÐžÑˆÐ¸Ð±ÐºÐ° (B < 0)" << std::endl << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ B: ") {
+		if (temp >= 0) break; 
 	}
-	arr[0][1] = b;
-	std::cout << "Ââåäèòå C: ";
-	std::cin >> c;
-	arr[1][0] = c;
-	std::cout << "Ââåäèòå D: ";
-	std::cin >> d;
-	arr[1][1] = d;
+	arr[0][1] = temp;
+	std::cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ C: ";
+	std::cin >> temp;
+	arr[1][0] = temp;
+	std::cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ D: ";
+	std::cin >> temp;
+	arr[1][1] = temp;
 
 	transform2d(arr);
 
@@ -55,7 +55,7 @@ void firstClause()
 void secondClause()
 {
 	double a, b, *pa = &a, *pb = &b;
-	std::cout << "Ââåäèòå A è B: ";
+	std::cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ A Ð¸ B: ";
 	std::cin >> a >> b;
 	*pa *= 3;
 	pa = new double(a);
@@ -73,7 +73,7 @@ int main()
 {
 	setlocale(LC_ALL, "Russian");
 	uint16_t flag;
-	std::cout << "Ïóíêò 1: 1" << std::endl << "Ïóíêò 2: 2" << std::endl;
+	std::cout << "ÐŸÑƒÐ½ÐºÑ‚ 1: 1" << std::endl << "ÐŸÑƒÐ½ÐºÑ‚ 2: 2" << std::endl;
 	std::cin >> flag;
 
 	if (flag == 1) 
