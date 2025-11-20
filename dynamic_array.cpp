@@ -8,9 +8,9 @@
 template<typename T>
 class dynamic_array {
 public:
-	unsigned long long capacity;
-	unsigned long long size;
-	T* inner;
+	unsigned long long capacity = DEFAULT_CAPACITY;
+	unsigned long long size = 0;
+	T* inner = nullptr;
 
 	dynamic_array<T>() : size(0), capacity(DEFAULT_CAPACITY) {
 		inner = reinterpret_cast<T*>(calloc(capacity, sizeof(T)));
@@ -69,9 +69,8 @@ public:
 	}
 
 	dynamic_array<T>& insert(unsigned long long index, T e) {
-		++size;
-		if (index >= size) throw "Выход за границу массива";
-		if (capacity < size) {
+		if (index > size) throw "Выход за границу массива";
+		if (capacity <= size) {
 			capacity += DEFAULT_CAPACITY;
 			T* new_inner = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
 
@@ -79,8 +78,8 @@ public:
 				new (&new_inner[i]) T(inner[i]);
 			}
 			new (&new_inner[index]) T(e);
-			if (index != size - 1) {
-				for (unsigned long long i = index; i < size - 1; ++i) {
+			if (index != size) {
+				for (unsigned long long i = index; i < size; ++i) {
 					new (&new_inner[i]) T(inner[i]);
 				}
 			}
@@ -88,12 +87,13 @@ public:
 			inner = new_inner;
 		}
 		else {
-			for (unsigned long long i = size - 1; i > index; ++i) {
+			for (unsigned long long i = size; i > index; ++i) {
 				new (&inner[i]) T(inner[i-1]);
 				inner[i-1].~T();
 			}
 			new (&inner[index]) T(e);
 		}
+		size++;
 		return *this;
 	}
 
@@ -102,14 +102,25 @@ public:
 		return *this;
 	}
 
+	dynamic_array<T>& pop(unsigned long long index) {
+		if (index >= size) throw "Выход за границу массива";
+		for (unsigned long long i = index; i <= size; ++i) {
+			new (&inner[i]) T(inner[i + 1]);
+		}
+		--size;
+		return *this;
+	}
+	
 	// erase писать уже скучно
 
 private:
 	void freeInner()
 	{
+		if (!inner) return;
 		for (unsigned long long i = 0; i < size; ++i) {
 			inner[i].~T();
 		}
 		free(inner);
+		inner = nullptr; // двойное удаление
 	}
 };

@@ -5,9 +5,39 @@
 #define ROWS 2
 #define COLS 2
 
-void transform2d(dynamic_array<dynamic_array<long>>& arr)
+void transformMatrix2(dynamic_array<dynamic_array<long>>& arr, unsigned long* array_ptr) {
+	unsigned long decrement = 0;
+
+	for (unsigned long k = 1; k < *array_ptr + 1; ++k) {
+		for (unsigned long long i = 0; i < arr.size; ++i) {
+			arr[i].pop(*(array_ptr + k) - decrement);
+		}
+		decrement++;
+	}
+}
+
+unsigned long* findZeros(dynamic_array<dynamic_array<long>>& arr)
+{
+	unsigned long* zeros_arr = reinterpret_cast<unsigned long*>(malloc((arr[0].size + 1) * sizeof(unsigned long))) + 1;
+	unsigned long arr_size = 0;
+
+	for (unsigned long long j = 0; j < arr[0].size; ++j) {
+		for (unsigned long long i = 0; i < arr.size; ++i) {
+			if (arr[i][j] == 0) {
+				zeros_arr[arr_size++] = j;			
+				break;
+			}
+		}
+	}
+	*(--zeros_arr) = arr_size; // возвращаем не вектор из функции
+	return zeros_arr;
+}
+
+void transformMatrix(dynamic_array<dynamic_array<long>>& arr)
 {
 	long a = arr[0][0], b = arr[0][1], c = arr[1][0], d = arr[1][1];
+
+	unsigned long long value;
 	for (unsigned long long i = 0; i < ROWS; ++i) {
 		for (unsigned long long j = 0; j < b; ++j) {
 			arr[i].push_back((i - 1) * c + (j + 1) * d);
@@ -37,13 +67,13 @@ void firstClause()
 	}
 	arr[0][1] = temp;
 	std::cout << "Введите C: ";
-	std::cin >> temp;
-	arr[1][0] = temp;
+	std::cin >> arr[1][0];
 	std::cout << "Введите D: ";
-	std::cin >> temp;
-	arr[1][1] = temp;
+	std::cin >> arr[1][1];
 
-	transform2d(arr);
+	transformMatrix(arr);
+	unsigned long* zeros_ptr = findZeros(arr);
+	transformMatrix2(arr, zeros_ptr);
 
 	for (unsigned long long i = 0; i < arr.size; ++i) {
 		for (unsigned long long j = 0; j < arr[i].size; ++j)
@@ -75,11 +105,9 @@ int main()
 	uint16_t flag;
 	std::cout << "Пункт 1: 1" << std::endl << "Пункт 2: 2" << std::endl;
 	std::cin >> flag;
-
 	if (flag == 1) 
 		firstClause();
 	else if (flag == 2)
 		secondClause();
-
 	return 0;
 }
